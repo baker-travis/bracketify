@@ -1,42 +1,38 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
+import {Field, ErrorMessage, Form} from 'formik';
 
-const FORM_NAMES = {
-    NAME: 'tourney_name',
-    START_DATE: 'start_date',
-    END_DATE: 'end_date',
-    NUM_TEAMS: 'num_teams'
-};
+import {FORM_NAMES} from './Setup';
 
 const Label = styled.label`
     display: block;
 `;
 
 export default function SetupForm({handleBlur, handleChange, handleSubmit, values, errors}) {
+    console.log(errors);
     function renderTextField(label, name, type = 'text') {
         return (
             <Label>
                 {label}:{' '}
-                <input
+                <Field
                     type={type}
-                    value={values[name]}
-                    name={name} 
-                    onChange={handleChange}
-                    onBlur={handleBlur}
+                    name={name}
                 />
+                <ErrorMessage name={name} />
             </Label>
-        )
+        );
     }
 
     return (
-        <form onSubmit={handleSubmit}>
+        <Form>
             {renderTextField('Tournament Name', FORM_NAMES.NAME)}
             {renderTextField('Start Date', FORM_NAMES.START_DATE)}
             {renderTextField('End Date', FORM_NAMES.END_DATE)}
-            {renderTextField('Number of Teams', FORM_NAMES.NUM_TEAMS)}
+            {renderTextField('Number of Teams', FORM_NAMES.NUM_TEAMS, 'number')}
+            {values[FORM_NAMES.NUM_TEAMS] && !isBalancedBracket(values[FORM_NAMES.NUM_TEAMS]) && <p className="warning">The bracket will not be balanced without a 2 based number (2, 4, 8, 16, etc.)</p>}
             <button type="submit">Submit</button>
-        </form>
+        </Form>
     )
 }
 
@@ -47,3 +43,8 @@ SetupForm.propTypes = {
     values: PropTypes.object.isRequired,
     errors: PropTypes.object.isRequired
 };
+
+function isBalancedBracket(numTeams) {
+    const number = Number(numTeams);
+    return numTeams && number > 1 && (number & (number - 1)) === 0;
+}
